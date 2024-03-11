@@ -41,7 +41,7 @@ public:
     turn_++;
   }
   std::vector<int> legal_actions()const{
-    
+    return {};
   }
   bool is_done()const{
     return turn_ == end_turn;
