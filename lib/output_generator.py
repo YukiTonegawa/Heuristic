@@ -4,6 +4,39 @@ import shutil
 import subprocess
 from tqdm import tqdm
 
+
+"""
+使い方
+$python3 output_generator.py aaa.cpp INPUT_DIR OUTPUT_DIR
+$python3 output_generator.py aaa.py INPUT_DIR OUTPUT_DIR
+
+.pyファイル, .cppファイルでない場合エラー
+
+動作
+in/xxx.in, in/xxx2.in...を入力としてaaaを実行する
+inフォルダ内の指定した拡張子ファイル全てに対して行われる
+out/xxx.outを生成する
+
+"""
+
+# パラメータ
+#-------------------------------------------------------------------------------
+
+# 自分のc++コンパイラとオプション
+CPP_COMPILER = "g++-13"
+CPP_OPTION = ["-std=gnu++17", "-O2"]
+
+# pythonコマンド
+PYTHON_INTERPRETER = "python3"
+
+# IN_FILE_TYPE = '.in'
+IN_FILE_TYPE = '.txt'
+
+# OUT_FILE_TYPE = '.out'
+OUT_FILE_TYPE = '.txt'
+
+#-------------------------------------------------------------------------------
+
 # argsの形式がおかしい場合
 def invalid_args(MESSAGE):
     print('Error: invalid arguments')
@@ -44,35 +77,6 @@ def find_code(code_path):
     if not os.path.isfile(code_path):
         print('Error: there is no file named ' + r'"' + code_path +  r'"')
         exit(0)
-        
-"""
-使い方
-$python3 output_generator.py aaa.cpp INPUT_DIR OUTPUT_DIR
-$python3 output_generator.py aaa.py INPUT_DIR OUTPUT_DIR
-
-.pyファイル, .cppファイルでない場合エラー
-
-動作
-in/xxx.in, in/xxx2.in...を入力としてaaaを実行する
-inフォルダ内のin拡張子ファイル全てに対して行われる
-out/xxx.outを生成する
-
-"""
-
-# パラメータ
-#-------------------------------------------------------------------------------
-
-# 自分のc++コンパイラとオプション
-CPP_COMPILER = "g++-13"
-CPP_OPTION = ["-std=gnu++17", "-O2"]
-
-# pythonコマンド
-PYTHON_INTERPRETER = "python3"
-
-# FILE_TYPE = '.in'
-FILE_TYPE = '.txt'
-
-#-------------------------------------------------------------------------------
 
 # outフォルダ内の過去に作られたファイルを全て消す
 def clear_output_folder(OUTPUT_DIR):
@@ -93,7 +97,7 @@ def main():
     is_py = (s[1] == '.py')
 
     if (not is_cpp) and (not is_py):
-        invalid_args("python3 output_generator.py (aaa.cpp / aaa.py)")
+        invalid_args("python3 output_generator.py (aaa.cpp / aaa.py) INPUT_DIR OUTPUT_DIR")
     
     find_code(code_path)
     clear_output_folder(OUTPUT_DIR)
@@ -114,14 +118,14 @@ def main():
     for input_file_name in tqdm(os.listdir(INPUT_DIR)):
         s = os.path.splitext(input_file_name)
         # s = ['xxx', '.in']
-        if len(s) != 2 or s[1] != FILE_TYPE:
+        if len(s) != 2 or s[1] != IN_FILE_TYPE:
             continue
 
         # input_path: INPUT_DIR/xxx.in
         input_path = INPUT_DIR + '/' + input_file_name
 
         # output_path: OUTPUT_DIR/xxx.out
-        output_path = OUTPUT_DIR + '/' + s[0] + '.out'
+        output_path = OUTPUT_DIR + '/' + s[0] + OUT_FILE_TYPE
 
         try:
             with open(input_path) as f:
