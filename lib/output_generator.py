@@ -3,8 +3,6 @@ import sys
 import shutil
 import subprocess
 from tqdm import tqdm
-import core
-
 
 # argsの形式がおかしい場合
 def invalid_args(MESSAGE):
@@ -49,8 +47,8 @@ def find_code(code_path):
         
 """
 使い方
-$python3 output_generator.py aaa.cpp
-$python3 output_generator.py aaa.py
+$python3 output_generator.py aaa.cpp INPUT_DIR OUTPUT_DIR
+$python3 output_generator.py aaa.py INPUT_DIR OUTPUT_DIR
 
 .pyファイル, .cppファイルでない場合エラー
 
@@ -71,21 +69,23 @@ CPP_OPTION = ["-std=gnu++17", "-O2"]
 # pythonコマンド
 PYTHON_INTERPRETER = "python3"
 
+# FILE_TYPE = '.in'
+FILE_TYPE = '.txt'
+
 #-------------------------------------------------------------------------------
-# 基本的に変えない
-INPUT_DIR = '../in'
-OUTPUT_DIR = '../out'
 
 # outフォルダ内の過去に作られたファイルを全て消す
-def clear_output_folder():
+def clear_output_folder(OUTPUT_DIR):
     shutil.rmtree(OUTPUT_DIR)
     os.mkdir(OUTPUT_DIR)
 
 def main():
-    if len(sys.argv) != 2:
-        invalid_args("python3 output_generator.py aaa.cpp")
+    if len(sys.argv) != 4:
+        invalid_args("python3 output_generator.py aaa.cpp INPUT_DIR OUTPUT_DIR")
 
     code_path = sys.argv[1]
+    INPUT_DIR = sys.argv[2]
+    OUTPUT_DIR = sys.argv[3]
 
     s = os.path.splitext(code_path)
     assert len(s) == 2
@@ -93,13 +93,13 @@ def main():
     is_py = (s[1] == '.py')
 
     if (not is_cpp) and (not is_py):
-        core.invalid_args("python3 output_generator.py (aaa.cpp / aaa.py)")
+        invalid_args("python3 output_generator.py (aaa.cpp / aaa.py)")
     
-    core.find_code(code_path)
-    clear_output_folder()
+    find_code(code_path)
+    clear_output_folder(OUTPUT_DIR)
 
     if is_cpp:
-        core.check_cpp_compiler(CPP_COMPILER)
+        check_cpp_compiler(CPP_COMPILER)
 
         # compile
         # 一時的なファイル__tmp_fileを生成
@@ -109,12 +109,12 @@ def main():
             assert False, 'compile failed'
             exit(0)
     elif is_py:
-        core.check_python_interpreter(PYTHON_INTERPRETER)
+        check_python_interpreter(PYTHON_INTERPRETER)
 
     for input_file_name in tqdm(os.listdir(INPUT_DIR)):
         s = os.path.splitext(input_file_name)
         # s = ['xxx', '.in']
-        if len(s) != 2 or s[1] != '.in':
+        if len(s) != 2 or s[1] != FILE_TYPE:
             continue
 
         # input_path: INPUT_DIR/xxx.in
